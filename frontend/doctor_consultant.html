@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Consultation - AquaGuard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; }
+        .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 1.5em; }
+        .back-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 20px; border-radius: 20px; cursor: pointer; text-decoration: none; font-size: 14px; }
+        .back-btn:hover { background: rgba(255,255,255,0.35); }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 25px; }
+        .tab { padding: 10px 25px; background: white; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .tab.active { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Doctors Grid */
+        .doctors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .doctor-card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: transform 0.2s; }
+        .doctor-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+        .doctor-avatar { width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, #1e3c72, #2a5298); display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 15px; }
+        .doctor-name { font-size: 1.1em; font-weight: 700; color: #1e3c72; }
+        .doctor-spec { color: #2a5298; font-size: 0.9em; margin: 4px 0 8px; }
+        .doctor-info { font-size: 0.85em; color: #666; margin: 3px 0; }
+        .availability { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.8em; margin: 8px 0; }
+        .available { background: #d4edda; color: #155724; }
+        .busy { background: #fff3cd; color: #856404; }
+        .book-btn { width: 100%; padding: 10px; background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; margin-top: 10px; }
+        .book-btn:hover { opacity: 0.9; }
+
+        /* Booking Form */
+        .booking-form { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); max-width: 600px; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-weight: 600; color: #333; margin-bottom: 6px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .submit-btn { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; border: none; padding: 12px 35px; border-radius: 8px; cursor: pointer; font-size: 15px; }
+        .submit-btn:hover { opacity: 0.9; }
+
+        /* Appointments */
+        .appointment-card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .appt-info h3 { color: #1e3c72; margin-bottom: 5px; }
+        .appt-info p { color: #666; font-size: 0.9em; }
+        .status-badge { padding: 5px 14px; border-radius: 20px; font-size: 0.85em; font-weight: 600; }
+        .status-confirmed { background: #d4edda; color: #155724; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-completed { background: #cce5ff; color: #004085; }
+        .cancel-btn { background: #fee; color: #c0392b; border: 1px solid #f5c6cb; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+
+        /* Consultation Chat */
+        .chat-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; height: 600px; }
+        .chat-sidebar { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); overflow-y: auto; }
+        .chat-sidebar h3 { color: #1e3c72; margin-bottom: 15px; font-size: 1em; }
+        .chat-contact { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; cursor: pointer; margin-bottom: 5px; }
+        .chat-contact:hover, .chat-contact.active { background: #eef2f7; }
+        .contact-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #1e3c72, #2a5298); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .contact-name { font-weight: 600; font-size: 0.9em; color: #333; }
+        .contact-spec { font-size: 0.78em; color: #888; }
+        .chat-main { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); display: flex; flex-direction: column; }
+        .chat-header-bar { padding: 15px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 12px; }
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .msg { max-width: 70%; padding: 10px 15px; border-radius: 12px; font-size: 0.9em; line-height: 1.5; }
+        .msg.sent { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; align-self: flex-end; border-bottom-right-radius: 3px; }
+        .msg.received { background: #f0f4ff; color: #333; align-self: flex-start; border-bottom-left-radius: 3px; }
+        .msg-time { font-size: 0.72em; opacity: 0.7; margin-top: 4px; }
+        .chat-input-bar { padding: 15px 20px; border-top: 1px solid #eee; display: flex; gap: 10px; }
+        .chat-input-bar input { flex: 1; padding: 10px 15px; border: 1px solid #ddd; border-radius: 25px; font-size: 14px; }
+        .send-btn { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; }
+        .no-chat { display: flex; align-items: center; justify-content: center; flex: 1; color: #999; font-size: 1em; }
+
+        .success-msg { background: #d4edda; color: #155724; padding: 12px 18px; border-radius: 8px; margin-bottom: 20px; display: none; }
+        .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-btn { padding: 7px 18px; border: 1px solid #2a5298; border-radius: 20px; background: white; color: #2a5298; cursor: pointer; font-size: 13px; }
+        .filter-btn.active { background: #2a5298; color: white; }
+
+        @media (max-width: 768px) {
+            .chat-layout { grid-template-columns: 1fr; height: auto; }
+            .chat-sidebar { height: 200px; }
+            .chat-main { height: 400px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👨‍⚕️ Doctor Consultation</h1>
+        <a href="index.html" class="back-btn">← Back to Dashboard</a>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('doctors', this)">Find Doctors</button>
+            <button class="tab" onclick="showTab('book', this)">Book Appointment</button>
+            <button class="tab" onclick="showTab('appointments', this)">My Appointments</button>
+            <button class="tab" onclick="showTab('consult', this)">Consultation Chat</button>
+        </div>
+
+        <!-- Find Doctors -->
+        <div id="doctors" class="tab-content active">
+            <div class="filter-bar">
+                <button class="filter-btn active" onclick="filterDoctors('all', this)">All</button>
+                <button class="filter-btn" onclick="filterDoctors('General Physician', this)">General Physician</button>
+                <button class="filter-btn" onclick="filterDoctors('Gastroenterologist', this)">Gastroenterologist</button>
+                <button class="filter-btn" onclick="filterDoctors('Infectious Disease', this)">Infectious Disease</button>
+                <button class="filter-btn" onclick="filterDoctors('Epidemiologist', this)">Epidemiologist</button>
+            </div>
+            <div class="doctors-grid" id="doctorsGrid"></div>
+        </div>
+
+        <!-- Book Appointment -->
+        <div id="book" class="tab-content">
+            <div id="bookingSuccess" class="success-msg">✅ Appointment booked successfully! You will receive a confirmation shortly.</div>
+            <div class="booking-form">
+                <h2 style="color:#1e3c72; margin-bottom:20px;">📅 Book an Appointment</h2>
+                <div class="form-group">
+                    <label>Select Doctor</label>
+                    <select id="bookDoctor">
+                        <option value="">-- Select a Doctor --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Patient Name</label>
+                    <input type="text" id="patientName" placeholder="Your full name">
+                </div>
+                <div class="form-group">
+                    <label>Contact Number</label>
+                    <input type="tel" id="patientPhone" placeholder="+91-XXXXXXXXXX">
+                </div>
+                <div class="form-group">
+                    <label>Preferred Date</label>
+                    <input type="date" id="apptDate">
+                </div>
+                <div class="form-group">
+                    <label>Preferred Time</label>
+                    <select id="apptTime">
+                        <option value="09:00">09:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="14:00">02:00 PM</option>
+                        <option value="15:00">03:00 PM</option>
+                        <option value="16:00">04:00 PM</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Consultation Type</label>
+                    <select id="consultType">
+                        <option value="video">Video Call</option>
+                        <option value="chat">Chat</option>
+                        <option value="in-person">In-Person</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Symptoms / Reason</label>
+                    <textarea id="symptoms" placeholder="Describe your symptoms or reason for consultation..."></textarea>
+                </div>
+                <button class="submit-btn" onclick="bookAppointment()">Book Appointment</button>
+            </div>
+        </div>
+
+        <!-- My Appointments -->
+        <div id="appointments" class="tab-content">
+            <h2 style="color:#1e3c72; margin-bottom:20px;">📋 My Appointments</h2>
+            <div id="appointmentsList"></div>
+        </div>
+
+        <!-- Consultation Chat -->
+        <div id="consult" class="tab-content">
+            <div class="chat-layout">
+                <div class="chat-sidebar">
+                    <h3>💬 Active Consultations</h3>
+                    <div id="chatContacts"></div>
+                </div>
+                <div class="chat-main" id="chatMain">
+                    <div class="no-chat">Select a doctor to start consultation</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const API_URL = API_BASE_URL;
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = 'auth.html';
+
+        const doctors = [
+            { id: 1, name: 'Dr. Priya Sharma', spec: 'General Physician', exp: '12 years', location: 'Guwahati, Assam', available: true, fee: '₹300', emoji: '👩‍⚕️', diseases: ['Cholera', 'Typhoid', 'Diarrhea'] },
+            { id: 2, name: 'Dr. Rajesh Borah', spec: 'Gastroenterologist', exp: '18 years', location: 'Dibrugarh, Assam', available: true, fee: '₹500', emoji: '👨‍⚕️', diseases: ['Gastroenteritis', 'Dysentery', 'Hepatitis A'] },
+            { id: 3, name: 'Dr. Meena Devi', spec: 'Infectious Disease', exp: '10 years', location: 'Imphal, Manipur', available: false, fee: '₹450', emoji: '👩‍⚕️', diseases: ['Cholera', 'Hepatitis A', 'Typhoid'] },
+            { id: 4, name: 'Dr. Arun Gogoi', spec: 'Epidemiologist', exp: '15 years', location: 'Jorhat, Assam', available: true, fee: '₹400', emoji: '👨‍⚕️', diseases: ['All water-borne diseases'] },
+            { id: 5, name: 'Dr. Sunita Rao', spec: 'General Physician', exp: '8 years', location: 'Shillong, Meghalaya', available: true, fee: '₹250', emoji: '👩‍⚕️', diseases: ['Diarrhea', 'Dysentery', 'Gastroenteritis'] },
+            { id: 6, name: 'Dr. Bikash Das', spec: 'Gastroenterologist', exp: '20 years', location: 'Silchar, Assam', available: false, fee: '₹600', emoji: '👨‍⚕️', diseases: ['Hepatitis A', 'Gastroenteritis', 'Cholera'] },
+        ];
+
+        let appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+        let activeChat = null;
+        let chatMessages = JSON.parse(localStorage.getItem('chatMessages') || '{}');
+
+        function showTab(name, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(name).classList.add('active');
+            el.classList.add('active');
+            if (name === 'appointments') renderAppointments();
+            if (name === 'consult') renderChatContacts();
+        }
+
+        function filterDoctors(spec, el) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            renderDoctors(spec);
+        }
+
+        function renderDoctors(filter = 'all') {
+            const grid = document.getElementById('doctorsGrid');
+            const filtered = filter === 'all' ? doctors : doctors.filter(d => d.spec === filter);
+            grid.innerHTML = filtered.map(d => `
+                <div class="doctor-card">
+                    <div class="doctor-avatar">${d.emoji}</div>
+                    <div class="doctor-name">${d.name}</div>
+                    <div class="doctor-spec">${d.spec}</div>
+                    <div class="doctor-info">📍 ${d.location}</div>
+                    <div class="doctor-info">🏥 ${d.exp} experience</div>
+                    <div class="doctor-info">💊 ${d.diseases.join(', ')}</div>
+                    <div class="doctor-info" style="margin-top:6px;font-weight:600;color:#1e3c72;">Consultation: ${d.fee}</div>
+                    <span class="availability ${d.available ? 'available' : 'busy'}">${d.available ? '🟢 Available' : '🟡 Busy'}</span>
+                    <button class="book-btn" onclick="goBook(${d.id})">📅 Book Appointment</button>
+                </div>
+            `).join('');
+        }
+
+        function goBook(doctorId) {
+            showTab('book', document.querySelectorAll('.tab')[1]);
+            document.getElementById('bookDoctor').value = doctorId;
+        }
+
+        function populateDoctorSelect() {
+            const sel = document.getElementById('bookDoctor');
+            doctors.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d.id;
+                opt.textContent = `${d.name} - ${d.spec}`;
+                sel.appendChild(opt);
+            });
+            // Set min date to today
+            document.getElementById('apptDate').min = new Date().toISOString().split('T')[0];
+        }
+
+        function bookAppointment() {
+            const doctorId = parseInt(document.getElementById('bookDoctor').value);
+            const name = document.getElementById('patientName').value.trim();
+            const phone = document.getElementById('patientPhone').value.trim();
+            const date = document.getElementById('apptDate').value;
+            const time = document.getElementById('apptTime').value;
+            const type = document.getElementById('consultType').value;
+            const symptoms = document.getElementById('symptoms').value.trim();
+
+            if (!doctorId || !name || !date) {
+                alert('Please fill in Doctor, Patient Name, and Date.');
+                return;
+            }
+
+            const doctor = doctors.find(d => d.id === doctorId);
+            const appt = {
+                id: 'APT-' + Date.now(),
+                doctorId, doctorName: doctor.name, spec: doctor.spec,
+                patientName: name, phone, date, time, type, symptoms,
+                status: 'Confirmed', bookedAt: new Date().toISOString()
+            };
+
+            appointments.push(appt);
+            localStorage.setItem('appointments', JSON.stringify(appointments));
+
+            // Also send to backend
+            fetch(`${API_URL}/doctor/book`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(appt)
+            }).catch(() => {});
+
+            document.getElementById('bookingSuccess').style.display = 'block';
+            setTimeout(() => document.getElementById('bookingSuccess').style.display = 'none', 4000);
+            document.getElementById('patientName').value = '';
+            document.getElementById('patientPhone').value = '';
+            document.getElementById('symptoms').value = '';
+        }
+
+        function renderAppointments() {
+            const div = document.getElementById('appointmentsList');
+            if (!appointments.length) {
+                div.innerHTML = '<p style="color:#999;text-align:center;padding:40px;">No appointments booked yet.</p>';
+                return;
+            }
+            div.innerHTML = appointments.slice().reverse().map(a => `
+                <div class="appointment-card">
+                    <div class="appt-info">
+                        <h3>${a.doctorName} <span style="font-weight:400;font-size:0.9em;color:#666;">— ${a.spec}</span></h3>
+                        <p>👤 ${a.patientName} &nbsp;|&nbsp; 📅 ${a.date} at ${a.time} &nbsp;|&nbsp; 📱 ${a.type}</p>
+                        ${a.symptoms ? `<p style="margin-top:4px;color:#888;font-size:0.85em;">Symptoms: ${a.symptoms}</p>` : ''}
+                        <p style="font-size:0.8em;color:#aaa;margin-top:4px;">ID: ${a.id}</p>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+                        <span class="status-badge status-${a.status.toLowerCase()}">${a.status}</span>
+                        <button class="cancel-btn" onclick="cancelAppointment('${a.id}')">Cancel</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function cancelAppointment(id) {
+            if (!confirm('Cancel this appointment?')) return;
+            appointments = appointments.filter(a => a.id !== id);
+            localStorage.setItem('appointments', JSON.stringify(appointments));
+            renderAppointments();
+        }
+
+        function renderChatContacts() {
+            const div = document.getElementById('chatContacts');
+            // Show doctors with confirmed appointments
+            const bookedDoctorIds = [...new Set(appointments.map(a => a.doctorId))];
+            const chatDoctors = bookedDoctorIds.length ? doctors.filter(d => bookedDoctorIds.includes(d.id)) : doctors.slice(0, 3);
+            div.innerHTML = chatDoctors.map(d => `
+                <div class="chat-contact ${activeChat === d.id ? 'active' : ''}" onclick="openChat(${d.id})">
+                    <div class="contact-avatar">${d.emoji}</div>
+                    <div>
+                        <div class="contact-name">${d.name}</div>
+                        <div class="contact-spec">${d.spec}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openChat(doctorId) {
+            activeChat = doctorId;
+            const doctor = doctors.find(d => d.id === doctorId);
+            if (!chatMessages[doctorId]) {
+                chatMessages[doctorId] = [
+                    { from: 'doctor', text: `Hello! I'm ${doctor.name}. How can I help you today?`, time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) }
+                ];
+            }
+            renderChatContacts();
+            renderChatWindow(doctor);
+        }
+
+        function renderChatWindow(doctor) {
+            const main = document.getElementById('chatMain');
+            const msgs = chatMessages[doctor.id] || [];
+            main.innerHTML = `
+                <div class="chat-header-bar">
+                    <div class="contact-avatar">${doctor.emoji}</div>
+                    <div>
+                        <div style="font-weight:700;color:#1e3c72;">${doctor.name}</div>
+                        <div style="font-size:0.82em;color:#888;">${doctor.spec} · ${doctor.location}</div>
+                    </div>
+                    <span class="availability ${doctor.available ? 'available' : 'busy'}" style="margin-left:auto;">${doctor.available ? '🟢 Online' : '🟡 Away'}</span>
+                </div>
+                <div class="chat-messages" id="chatMsgs">
+                    ${msgs.map(m => `
+                        <div class="msg ${m.from === 'user' ? 'sent' : 'received'}">
+                            ${m.text}
+                            <div class="msg-time">${m.time}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="chat-input-bar">
+                    <input type="text" id="chatInput" placeholder="Type your message..." onkeydown="if(event.key==='Enter') sendMessage(${doctor.id})">
+                    <button class="send-btn" onclick="sendMessage(${doctor.id})">Send ➤</button>
+                </div>
+            `;
+            scrollChat();
+        }
+
+        function sendMessage(doctorId) {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const time = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+            chatMessages[doctorId].push({ from: 'user', text, time });
+            input.value = '';
+
+            // Auto-reply from doctor
+            setTimeout(() => {
+                const replies = [
+                    'Thank you for sharing that. Can you tell me more about when the symptoms started?',
+                    'I understand. Based on the water contamination in your area, this could be related. Please stay hydrated.',
+                    'I recommend getting a water quality test done. In the meantime, drink only boiled or filtered water.',
+                    'Please avoid drinking tap water until the contamination issue is resolved in your area.',
+                    'I will review your case and provide a detailed prescription. Please book a follow-up if symptoms persist.',
+                    'Make sure to take ORS (Oral Rehydration Solution) if you are experiencing diarrhea or vomiting.'
+                ];
+                const reply = replies[Math.floor(Math.random() * replies.length)];
+                chatMessages[doctorId].push({ from: 'doctor', text: reply, time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) });
+                localStorage.setItem('chatMessages', JSON.stringify(chatMessages));
+                const doctor = doctors.find(d => d.id === doctorId);
+                renderChatWindow(doctor);
+            }, 1000);
+
+            localStorage.setItem('chatMessages', JSON.stringify(chatMessages));
+            const doctor = doctors.find(d => d.id === doctorId);
+            renderChatWindow(doctor);
+        }
+
+        function scrollChat() {
+            const msgs = document.getElementById('chatMsgs');
+            if (msgs) msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        // Init
+        renderDoctors();
+        populateDoctorSelect();
+    </script>
+</body>
+</html>

@@ -1,0 +1,321 @@
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaGuard - Smart Water Monitoring</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow-x: hidden; }
+        
+        nav {
+            position: fixed; top: 0; width: 100%; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px); padding: 20px 60px; display: flex;
+            justify-content: space-between; align-items: center; z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        .logo { font-size: 24px; font-weight: bold; color: #1e3c72; }
+        .nav-links { display: flex; gap: 40px; align-items: center; }
+        .nav-links a { text-decoration: none; color: #333; font-weight: 500; transition: color 0.3s; }
+        .nav-links a:hover { color: #1e3c72; }
+        .nav-btn { 
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); 
+            color: white; padding: 12px 30px; border-radius: 25px; text-decoration: none;
+            transition: transform 0.3s;
+        }
+        .nav-btn:hover { transform: translateY(-2px); }
+        
+        .hero {
+            margin-top: 80px; min-height: 90vh; display: grid;
+            grid-template-columns: 1fr 1fr; align-items: center; padding: 60px; gap: 60px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        }
+        .hero-content h1 { font-size: 3.5em; color: #1e3c72; line-height: 1.2; margin-bottom: 20px; }
+        .hero-content h1 span { color: #2a5298; }
+        .hero-content p { font-size: 1.3em; color: #666; margin-bottom: 40px; line-height: 1.6; }
+        .hero-buttons { display: flex; gap: 20px; }
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white; padding: 18px 40px; border-radius: 30px; text-decoration: none;
+            font-size: 18px; font-weight: 600; transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(30,60,114,0.3);
+        }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(30,60,114,0.4); }
+        .btn-secondary {
+            background: white; color: #1e3c72; padding: 18px 40px; border-radius: 30px;
+            text-decoration: none; font-size: 18px; font-weight: 600; border: 2px solid #1e3c72;
+            transition: all 0.3s;
+        }
+        .btn-secondary:hover { background: #1e3c72; color: white; }
+        .hero-image { position: relative; height: 600px; display: flex; align-items: center; justify-content: center; }
+        .hero-image img { width: 100%; height: 100%; object-fit: cover; border-radius: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+        
+        .features { padding: 100px 60px; background: white; }
+        .section-title { text-align: center; font-size: 2.8em; color: #1e3c72; margin-bottom: 20px; }
+        .section-subtitle { text-align: center; font-size: 1.2em; color: #666; margin-bottom: 60px; }
+        .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; max-width: 1200px; margin: 0 auto; }
+        .feature-card {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 40px; border-radius: 20px; text-align: center; transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        .feature-card:hover { transform: translateY(-10px); border-color: #2a5298; box-shadow: 0 20px 40px rgba(30,60,114,0.15); }
+        .feature-icon { width: 120px; height: 120px; margin: 0 auto 20px; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .feature-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .feature-card h3 { font-size: 1.5em; color: #1e3c72; margin-bottom: 15px; }
+        .feature-card p { color: #666; line-height: 1.6; }
+        
+        .how-it-works { padding: 100px 60px; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; }
+        .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; max-width: 1200px; margin: 60px auto 0; }
+        .step { text-align: center; position: relative; }
+        .step-number {
+            width: 80px; height: 80px; background: white; color: #1e3c72; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 2em;
+            font-weight: bold; margin: 0 auto 20px;
+        }
+        .step h3 { margin-bottom: 10px; }
+        .step p { opacity: 0.9; }
+        
+        .stats { padding: 80px 60px; background: white; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; max-width: 1200px; margin: 0 auto; text-align: center; }
+        .stat-item h2 { font-size: 3.5em; color: #1e3c72; margin-bottom: 10px; }
+        .stat-item p { font-size: 1.2em; color: #666; }
+        
+        .cta { padding: 100px 60px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); text-align: center; }
+        .cta h2 { font-size: 3em; color: #1e3c72; margin-bottom: 20px; }
+        .cta p { font-size: 1.3em; color: #666; margin-bottom: 40px; }
+        
+        footer { background: #1e3c72; color: white; padding: 40px 60px; }
+        .footer-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        .footer-links a { color: white; text-decoration: none; margin: 0 15px; }
+        .footer-links a:hover { text-decoration: underline; }
+        .theme-toggle { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 15px; border-radius: 20px; cursor: pointer; margin-left: 20px; }
+        .theme-toggle:hover { background: rgba(255,255,255,0.3); }
+        body.dark-mode { background: #1a1a1a; color: #fff; }
+        body.dark-mode .hero, body.dark-mode .features, body.dark-mode .stats, body.dark-mode .cta { background: #2a2a2a; }
+        body.dark-mode .feature-card { background: #333; }
+        body.dark-mode nav { background: rgba(30,30,30,0.95); }
+        body.dark-mode .nav-links a { color: #fff; }
+        
+        .chatbot { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
+        .chat-button { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border: none; font-size: 24px; cursor: pointer; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+        .chat-button:hover { transform: scale(1.1); }
+        .chat-window { display: none; position: fixed; bottom: 90px; right: 20px; width: 350px; height: 500px; background: white; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); flex-direction: column; }
+        .chat-window.open { display: flex; }
+        .chat-header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 15px; border-radius: 15px 15px 0 0; display: flex; justify-content: space-between; align-items: center; }
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; }
+        .message { margin-bottom: 10px; padding: 10px; border-radius: 10px; max-width: 80%; }
+        .message.bot { background: #f0f9ff; align-self: flex-start; }
+        .message.user { background: #2a5298; color: white; align-self: flex-end; margin-left: auto; }
+        .chat-input { display: flex; padding: 10px; border-top: 1px solid #e0e0e0; }
+        .chat-input input { flex: 1; padding: 10px; border: 1px solid #e0e0e0; border-radius: 20px; }
+        .chat-input button { background: #2a5298; color: white; border: none; padding: 10px 20px; border-radius: 20px; margin-left: 10px; cursor: pointer; }
+        
+        @media (max-width: 768px) {
+            .hero { grid-template-columns: 1fr; padding: 40px 20px; }
+            .hero-content h1 { font-size: 2em; }
+            .feature-grid, .steps, .stats-grid { grid-template-columns: 1fr; }
+            nav { padding: 20px; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">AquaGuard</div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#how">How It Works</a>
+            <a href="#stats">Impact</a>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+            <a href="auth.html" class="nav-btn">Get Started</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Protecting Communities Through <span>Smart Water Monitoring</span></h1>
+            <p>AI-powered water quality analysis and early disease warning system for Rural Northeast India. Detect contamination instantly and save lives.</p>
+            <div class="hero-buttons">
+                <a href="auth.html" class="btn-primary">Start Monitoring</a>
+                <a href="#features" class="btn-secondary">Learn More</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="homepage.jpg" alt="Water Monitoring System">
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <h2 class="section-title">Comprehensive Water Safety Solution</h2>
+        <p class="section-subtitle">Everything you need to monitor and protect your community's water supply</p>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><img src="IA.jpeg" alt="Instant Analysis"></div>
+                <h3>Instant Analysis</h3>
+                <p>Upload water sample images and get AI-powered contamination results in seconds with 90%+ accuracy</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><img src="dp.jpeg" alt="Disease Prediction"></div>
+                <h3>Disease Prediction</h3>
+                <p>Predict 6 water-borne diseases including Cholera, Typhoid, and Hepatitis A with prevention tips</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><img src="rm.jpeg" alt="Risk Mapping"></div>
+                <h3>Risk Mapping</h3>
+                <p>Interactive maps showing contamination hotspots across Northeast India in real-time</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><img src="sa.jpeg" alt="Smart Alerts"></div>
+                <h3>Smart Alerts</h3>
+                <p>Automatic notifications to NGOs and health departments for rapid emergency response</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><img src="da.jpeg" alt="Data Analytics"></div>
+                <h3>Data Analytics</h3>
+                <p>Track contamination patterns and identify high-risk areas using historical data analysis</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><img src="cn.jpeg" alt="Community Network"></div>
+                <h3>Community Network</h3>
+                <p>Connect health workers, NGOs, and officials for coordinated community protection</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="how-it-works" id="how">
+        <h2 class="section-title" style="color: white;">How It Works</h2>
+        <p class="section-subtitle" style="color: rgba(255,255,255,0.9);">Simple 4-step process to protect your community</p>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Upload Sample</h3>
+                <p>Take a photo of water sample from your source</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>AI Analysis</h3>
+                <p>Our AI analyzes contamination indicators instantly</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Get Results</h3>
+                <p>Receive detailed report with disease predictions</p>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <h3>Take Action</h3>
+                <p>Alerts sent to health officials for rapid response</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats" id="stats">
+        <h2 class="section-title">Our Impact</h2>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <h2>90%+</h2>
+                <p>Detection Accuracy</p>
+            </div>
+            <div class="stat-item">
+                <h2>1991+</h2>
+                <p>Locations Monitored</p>
+            </div>
+            <div class="stat-item">
+                <h2>24/7</h2>
+                <p>Real-time Monitoring</p>
+            </div>
+            <div class="stat-item">
+                <h2>6</h2>
+                <p>Diseases Predicted</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <h2>Ready to Protect Your Community?</h2>
+        <p>Join thousands of health workers and community leaders using AquaGuard</p>
+        <a href="auth.html" class="btn-primary" style="font-size: 20px; padding: 20px 50px;">Get Started Free</a>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div>
+                <p>&copy; 2026 AquaGuard - Smart Community Health Monitoring System</p>
+                <p style="margin-top: 10px; opacity: 0.8;">Protecting Rural Northeast India through AI-powered water safety</p>
+            </div>
+            <div class="footer-links">
+                <a href="contact.html">Contact Us</a>
+                <a href="about.html">About</a>
+                <a href="privacy.html">Privacy</a>
+                <a href="feedback.html">Feedback</a>
+            </div>
+        </div>
+    </footer>
+
+    <div class="chatbot">
+        <button class="chat-button" onclick="toggleChat()">💬</button>
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-header">
+                <span>AquaGuard Assistant</span>
+                <button onclick="toggleChat()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">×</button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">Hi! I'm your AquaGuard assistant. Ask me about water analysis, diseases, or features!</div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const btn = document.querySelector('.theme-toggle');
+            btn.textContent = document.body.classList.contains('dark-mode') ? '☀️ Light Mode' : '🌙 Dark Mode';
+        }
+        
+        function toggleChat() {
+            document.getElementById('chatWindow').classList.toggle('open');
+        }
+        
+        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:5000/api'
+            : 'https://aquaguard-backend.onrender.com/api';
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            const messagesDiv = document.getElementById('chatMessages');
+            messagesDiv.innerHTML += `<div class="message user">${message}</div>`;
+            input.value = '';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            
+            try {
+                const response = await fetch(`${API_URL}/chatbot`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({message})
+                });
+                const data = await response.json();
+                messagesDiv.innerHTML += `<div class="message bot">${data.response}</div>`;
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            } catch (error) {
+                messagesDiv.innerHTML += `<div class="message bot">Sorry, I'm having trouble connecting. Please try again.</div>`;
+            }
+        }
+        
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback - AquaGuard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; }
+        nav { background: #1e3c72; color: white; padding: 20px 60px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: bold; }
+        .back-link { color: white; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+        .container { max-width: 600px; margin: 60px auto; padding: 40px; background: white; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        h1 { color: #1e3c72; font-size: 2.5em; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; color: #333; margin-bottom: 8px; font-weight: 500; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #2a5298; }
+        .rating { display: flex; gap: 10px; font-size: 30px; }
+        .rating span { cursor: pointer; color: #ddd; transition: color 0.2s; }
+        .rating span:hover, .rating span.active { color: #ffc107; }
+        .btn { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 14px 40px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; }
+        .btn:hover { opacity: 0.9; }
+        .success { background: #efe; color: #3c3; padding: 12px; border-radius: 8px; margin-top: 20px; display: none; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">AquaGuard</div>
+        <a href="home.html" class="back-link">← Back to Home</a>
+    </nav>
+    <div class="container">
+        <h1>Share Your Feedback</h1>
+        <p style="color: #666; margin-bottom: 30px;">Help us improve AquaGuard. Your feedback matters!</p>
+        
+        <form id="feedbackForm">
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" id="name" required placeholder="Your name">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" required placeholder="your@email.com">
+            </div>
+            <div class="form-group">
+                <label>Rating</label>
+                <div class="rating" id="rating">
+                    <span data-value="1">★</span>
+                    <span data-value="2">★</span>
+                    <span data-value="3">★</span>
+                    <span data-value="4">★</span>
+                    <span data-value="5">★</span>
+                </div>
+                <input type="hidden" id="ratingValue" value="5">
+            </div>
+            <div class="form-group">
+                <label>Your Feedback</label>
+                <textarea id="message" rows="6" required placeholder="Tell us what you think..."></textarea>
+            </div>
+            <button type="submit" class="btn">Submit Feedback</button>
+            <div class="success" id="successMsg">Thank you for your feedback!</div>
+        </form>
+    </div>
+    <script>
+        const stars = document.querySelectorAll('.rating span');
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                const value = star.dataset.value;
+                document.getElementById('ratingValue').value = value;
+                stars.forEach((s, i) => {
+                    s.classList.toggle('active', i < value);
+                });
+            });
+        });
+        stars.forEach((s, i) => s.classList.toggle('active', i < 5));
+
+        document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                rating: document.getElementById('ratingValue').value,
+                message: document.getElementById('message').value
+            };
+            
+            try {
+                const backendUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                    ? 'http://localhost:5000'
+                    : 'https://aquaguard-backend.onrender.com';
+                await fetch(backendUrl + '/api/feedback', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                document.getElementById('successMsg').style.display = 'block';
+                e.target.reset();
+                stars.forEach((s, i) => s.classList.toggle('active', i < 5));
+                setTimeout(() => { document.getElementById('successMsg').style.display = 'none'; }, 3000);
+            } catch (error) {
+                alert('Error submitting feedback');
+            }
+        });
+    </script>
+</body>
+</html>

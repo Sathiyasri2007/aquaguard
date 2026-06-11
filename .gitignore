@@ -1,0 +1,19 @@
+# Dataset images (too large for GitHub)
+Stagnant water and Wet surface Dataset/
+archive (6)/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+venv/
+.venv/
+
+# Uploads folder (runtime generated)
+backend/uploads/
+
+# OS
+.DS_Store
+Thumbs.db

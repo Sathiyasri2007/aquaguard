@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: aquaguard-backend
+    runtime: python
+    rootDir: .
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn backend.app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+  - type: static
+    name: aquaguard-frontend
+    rootDir: frontend
+    buildCommand: ""
+    staticPublishPath: .

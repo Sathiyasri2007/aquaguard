@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { width: 100vw; height: 100vh; }
+        #loading {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; padding: 20px 30px; border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.2); font-family: Arial; font-size: 15px; z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">⏳ Loading hotspot data from dataset...</div>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([22.0, 82.0], 5);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        var allLocations = [];
+        var markers = [];
+        var uploadedMarker = null;
+        var currentFilter = 'all';
+
+        // Get filter from URL param
+        var urlParams = new URLSearchParams(window.location.search);
+        currentFilter = urlParams.get('filter') || 'all';
+
+        var colorMap = { 'High Risk': '#e74c3c', 'Medium Risk': '#f39c12', 'Low Risk': '#27ae60' };
+        var radiusMap = { 'High Risk': 9, 'Medium Risk': 7, 'Low Risk': 5 };
+
+        function renderMarkers(filter) {
+            currentFilter = filter;
+            markers.forEach(function(m) { map.removeLayer(m); });
+            markers = [];
+
+            var filtered = filter === 'all'
+                ? allLocations
+                : allLocations.filter(function(l) { return l.risk_level === filter; });
+
+            filtered.forEach(function(loc) {
+                var color = colorMap[loc.risk_level] || '#999';
+                var radius = radiusMap[loc.risk_level] || 6;
+                var m = L.circleMarker([loc.latitude, loc.longitude], {
+                    radius: radius,
+                    fillColor: color,
+                    color: color,
+                    weight: 1.5,
+                    opacity: 0.9,
+                    fillOpacity: 0.7
+                }).addTo(map);
+
+                m.bindPopup(
+                    '<b>' + loc.location + '</b><br>' +
+                    '<b>State:</b> ' + loc.state + '<br>' +
+                    '<b>Risk Level:</b> <span style="color:' + color + '; font-weight:bold;">' + loc.risk_level + '</span><br>' +
+                    '<b>Risk Score:</b> ' + loc.risk_score + '/12<br>' +
+                    '<b>pH:</b> ' + loc.ph + ' | <b>BOD:</b> ' + loc.bod + ' mg/l<br>' +
+                    '<b>Fecal Coliform:</b> ' + loc.fecal_coliform + ' MPN/100ml<br>' +
+                    '<b>Year:</b> ' + loc.year
+                );
+                markers.push(m);
+            });
+        }
+
+        function addLegend(summary) {
+            var legend = L.control({ position: 'bottomleft' });
+            legend.onAdd = function() {
+                var div = L.DomUtil.create('div');
+                div.style.cssText = 'background:white; padding:14px; border-radius:8px; border:1px solid #ccc; font-family:Arial; font-size:13px; min-width:210px; box-shadow:0 2px 8px rgba(0,0,0,0.15);';
+                div.innerHTML =
+                    '<b style="font-size:14px;">💧 Water Contamination Risk</b><br><br>' +
+                    '<span style="display:inline-block;width:12px;height:12px;background:#e74c3c;border-radius:50%;margin-right:6px;"></span> High Risk: <b>' + (summary['High Risk'] || 0) + '</b> locations<br><br>' +
+                    '<span style="display:inline-block;width:12px;height:12px;background:#f39c12;border-radius:50%;margin-right:6px;"></span> Medium Risk: <b>' + (summary['Medium Risk'] || 0) + '</b> locations<br><br>' +
+                    '<span style="display:inline-block;width:12px;height:12px;background:#27ae60;border-radius:50%;margin-right:6px;"></span> Low Risk: <b>' + (summary['Low Risk'] || 0) + '</b> locations<br>' +
+                    '<hr style="margin:8px 0"><b>Total: ' + allLocations.length + '</b> locations monitored';
+                return div;
+            };
+            legend.addTo(map);
+        }
+
+        var BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? 'http://localhost:5000'
+            : 'https://aquaguard-backend.onrender.com';
+
+        // Load from backend
+        fetch(BACKEND_URL + '/api/hotspot-locations')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                allLocations = data.locations || [];
+                document.getElementById('loading').style.display = 'none';
+                renderMarkers(currentFilter);
+
+                var summary = { 'High Risk': 0, 'Medium Risk': 0, 'Low Risk': 0 };
+                allLocations.forEach(function(l) {
+                    if (summary[l.risk_level] !== undefined) summary[l.risk_level]++;
+                });
+                addLegend(summary);
+            })
+            .catch(function() {
+                document.getElementById('loading').textContent = '⚠️ Backend not running. Start with: python backend/app.py';
+            });
+
+        // Listen for messages from parent (filter + uploaded location)
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'filter') renderMarkers(event.data.value);
+            if (event.data.type === 'uploadedLocation') {
+                var d = event.data;
+                if (uploadedMarker) map.removeLayer(uploadedMarker);
+                var color = colorMap[d.riskLevel] || '#2a5298';
+                var icon = L.divIcon({
+                    html: '<div style="background:' + color + ';width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 0 8px rgba(0,0,0,0.5);"></div>',
+                    iconSize: [20, 20], iconAnchor: [10, 10], className: ''
+                });
+                uploadedMarker = L.marker([d.lat, d.lng], { icon: icon }).addTo(map);
+                uploadedMarker.bindPopup('<b>📍 ' + d.locationName + '</b><br>Risk: <span style="color:' + color + ';font-weight:bold;">' + d.riskLevel + '</span><br><i>Your uploaded sample</i>').openPopup();
+                map.setView([d.lat, d.lng], 9);
+            }
+        });
+    </script>
+</body>
+</html>
