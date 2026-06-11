@@ -281,10 +281,6 @@
             document.getElementById('chatWindow').classList.toggle('open');
         }
         
-        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? 'http://localhost:5000/api'
-            : 'https://aquaguard-zuug.onrender.com/api';
-
         async function sendMessage() {
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
@@ -294,19 +290,30 @@
             messagesDiv.innerHTML += `<div class="message user">${message}</div>`;
             input.value = '';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            
-            try {
-                const response = await fetch(`${API_URL}/chatbot`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({message})
-                });
-                const data = await response.json();
-                messagesDiv.innerHTML += `<div class="message bot">${data.response}</div>`;
+
+            const reply = getBotReply(message.toLowerCase());
+            setTimeout(() => {
+                messagesDiv.innerHTML += `<div class="message bot">${reply}</div>`;
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            } catch (error) {
-                messagesDiv.innerHTML += `<div class="message bot">Sorry, I'm having trouble connecting. Please try again.</div>`;
-            }
+            }, 400);
+        }
+
+        function getBotReply(msg) {
+            if (msg.includes('hello') || msg.includes('hi')) return 'Hello! How can I help you with water quality monitoring today?';
+            if (msg.includes('help')) return 'I can assist with: water analysis, disease predictions, risk mapping, alerts, and more. What would you like to know?';
+            if (msg.includes('water')) return 'To analyze water, upload a sample image in the Water Analysis tab. Our AI will detect contamination instantly.';
+            if (msg.includes('disease')) return 'We predict 6 water-borne diseases: Cholera, Typhoid, Diarrhea, Dysentery, Hepatitis A, and Gastroenteritis.';
+            if (msg.includes('cholera')) return 'Cholera is caused by contaminated water. Symptoms: severe diarrhea, vomiting, dehydration. Prevention: boil water before drinking.';
+            if (msg.includes('typhoid')) return 'Typhoid is spread through contaminated food/water. Symptoms: high fever, headache, stomach pain. Drink only filtered/boiled water.';
+            if (msg.includes('alert')) return 'Alerts are automatically generated when contamination is detected and can be sent to health departments.';
+            if (msg.includes('map')) return 'The Risk Map shows contamination hotspots across Northeast India with color-coded risk zones (Red=High, Yellow=Medium, Green=Low).';
+            if (msg.includes('how')) return 'Upload a water sample image → AI analyzes it → Get results with disease predictions → Download report.';
+            if (msg.includes('contact')) return 'You can reach us at support@aquaguard.org or use the Contact page.';
+            if (msg.includes('safe')) return 'Safe water has normal color, no smell, low turbidity and passes quality tests. Use the Water Analysis feature to check your water.';
+            if (msg.includes('report')) return 'You can upload lab reports in the Lab Report section to analyze water quality parameters like pH, turbidity, and more.';
+            if (msg.includes('doctor')) return 'Visit the Doctor Consultation page to find specialists and book appointments for water-borne disease treatment.';
+            if (msg.includes('feature')) return 'AquaGuard features: Water Analysis, Disease Prediction, Risk Mapping, Smart Alerts, Lab Report Analysis, and Doctor Consultation.';
+            return 'I can help with water analysis, diseases, alerts, and more. Try asking about "water", "disease", "map", or "help"!';
         }
         
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
