@@ -87,7 +87,7 @@
             try {
                 const backendUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
                     ? 'http://localhost:5000'
-                    : 'https://aquaguard-backend.onrender.com';
+                    : 'https://aquaguard-zuug.onrender.com';
                 await fetch(backendUrl + '/api/feedback', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
