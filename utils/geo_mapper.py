@@ -12,7 +12,7 @@ class HotspotAnalyzer:
         if not os.path.exists(csv_path):
             return
         try:
-            df = pd.read_csv(csv_path)
+            df = pd.read_csv(csv_path, encoding='latin-1')
             for _, row in df.iterrows():
                 self.risk_locations.append({
                     'location': str(row.get('location', '')),
